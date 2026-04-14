@@ -1,0 +1,186 @@
+# ======================
+# ENUMS
+# ======================
+
+enum Role {
+  ADMIN
+  MANAGER
+  MEMBER
+}
+
+enum Country {
+  INDIA
+  AMERICA
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+# ======================
+# QUERY
+# ======================
+
+type Query {
+  restaurants: [Restaurant!]!
+  restaurant(id: ID!): Restaurant
+
+  menus: [Menu!]!
+  dishes: [Dish!]!
+
+  orders: [Order!]!
+  order(id: ID!): Order
+
+  me: User!
+  paymentMethods: [PaymentMethod!]!
+}
+
+# ======================
+# MUTATIONS
+# ======================
+
+type Mutation {
+  createOrder(input: CreateOrderInput!): Order!
+
+  updateOrderStatus(orderId: ID!, status: OrderStatus!): Order!
+
+  cancelOrder(orderId: ID!): Order!
+
+  checkout(orderId: ID!, paymentMethodId: ID!): Payment!
+
+  addPaymentMethod(userId: ID!, input: AddPaymentMethodInput!): PaymentMethod!
+  updatePaymentMethod(id: ID!, input: AddPaymentMethodInput!): PaymentMethod!
+}
+
+# ======================
+# TYPES
+# ======================
+
+type User {
+  id: ID!
+  email: String!
+  firstName: String!
+  lastName: String!
+
+  role: Role!
+  country: Country!
+
+  orders: [Order!]!
+  paymentMethods: [PaymentMethod!]!
+}
+
+type Restaurant {
+  id: ID!
+  name: String!
+  address: String!
+  rating: Float
+  country: Country!
+
+  menus: [Menu!]!
+  imageUrl: String
+}
+
+type Menu {
+  id: ID!
+  name: String!
+  dishes: [Dish!]!
+}
+
+type Dish {
+  id: ID!
+  name: String!
+  price: Float!
+  description: String
+  menu: Menu!
+  imageUrl: String
+  isAvailable: Boolean!
+}
+
+type Order {
+  id: ID!
+  customer: User!
+  items: [OrderItem!]!
+
+  totalPrice: Float!
+  status: OrderStatus!
+
+  deliveryAddress: String!
+  country: Country!
+
+  payment: Payment
+
+  createdAt: String!
+  updatedAt: String!
+}
+
+type OrderItem {
+  id: ID!
+  dish: Dish!
+  quantity: Int!
+  price: Float!
+}
+
+# ======================
+# PAYMENT SYSTEM
+# ======================
+
+type Payment {
+  id: ID!
+  order: Order!
+  amount: Float!
+
+  status: PaymentStatus!
+  method: PaymentMethod!
+
+  createdAt: String!
+}
+
+type PaymentMethod {
+  id: ID!
+  type: String! # CARD / UPI / WALLET
+  provider: String! # Visa / Mastercard / GPay etc.
+
+  last4: String
+  expiryMonth: Int
+  expiryYear: Int
+
+  user: User!
+}
+
+# ======================
+# INPUTS
+# ======================
+
+input CreateOrderInput {
+  customerId: String!
+  items: [CreateOrderItemInput!]!
+  totalPrice: Float!
+  deliveryAddress: String!
+  country: Country!
+}
+
+input CreateOrderItemInput {
+  dishId: ID!
+  quantity: Int!
+  price: Float!
+}
+
+input AddPaymentMethodInput {
+  type: String!
+  provider: String!
+
+  cardNumber: String
+  expiryMonth: Int
+  expiryYear: Int
+}
