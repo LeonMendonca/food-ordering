@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
 import { CreateOrderInput, Order } from 'src/graphql';
 import { PrismaService } from 'src/prisma.service';
 import { AccessContextService } from 'src/access-context.service';
@@ -11,7 +11,13 @@ export class OrderService {
     ) { }
 
     async create(input: CreateOrderInput): Promise<Order> {
-        const country = this.accessContext.country || input.country;
+        // Only ADMIN and MANAGER can place orders
+        if (!this.accessContext.hasAnyRole(['ADMIN', 'MANAGER'])) {
+            throw new ForbiddenException('Only managers and admins can place orders');
+        }
+
+        // Enforce country scope for creation
+        const country = this.accessContext.getScopeFilter({ country: input.country }).country as any;
         
         return this.prisma.order.create({
             data: {
@@ -39,11 +45,9 @@ export class OrderService {
     }
 
     async cancel(id: string) {
-        const country = this.accessContext.country;
-
-        // Verify the order exists in the user's country
+        // Verify the order exists within scope
         const order = await this.prisma.order.findFirst({
-            where: country ? { id, country: country as any } : { id }
+            where: this.accessContext.getScopeFilter({ id })
         });
 
         if (!order) {

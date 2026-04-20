@@ -21,7 +21,7 @@ export class AccessContextMiddleware implements NestMiddleware {
         });
 
         if (user) {
-          this.accessContext.setContext(user.id, user.country);
+          this.accessContext.setContext(user.id, user.role, user.country);
         }
       } catch (error) {
         console.error('Error fetching user context:', error);

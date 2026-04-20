@@ -12,17 +12,15 @@ export class RestaurantService {
   }
 
   async findAll(): Promise<Restaurant[]> {
-    const country = this.accessContext.country;
     return this.prisma.restaurant.findMany({
-      where: country ? { country } : {},
+      where: this.accessContext.getScopeFilter(),
       include: { menus: { include: { dishes: true, } } }
     }) as any;
   }
 
   async findOne(id: string): Promise<Restaurant | null> {
-    const country = this.accessContext.country;
     return this.prisma.restaurant.findFirst({
-      where: country ? { id, country } : { id },
+      where: this.accessContext.getScopeFilter({ id }),
       include: { menus: { include: { dishes: true, } } }
     }) as any;
   }

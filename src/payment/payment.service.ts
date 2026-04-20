@@ -11,16 +11,12 @@ export class PaymentService {
   ) {}
 
   async addPaymentMethod(userId: string, input: AddPaymentMethodInput) {
-    const country = this.accessContext.country;
-
-    // Verify user belongs to the current country context
-    if (country) {
-      const user = await this.prisma.user.findFirst({
-        where: { id: userId, country: country as any }
-      });
-      if (!user) {
-        throw new Error('User not found or access denied');
-      }
+    // Verify user belongs to the current scope
+    const user = await this.prisma.user.findFirst({
+      where: this.accessContext.getScopeFilter({ id: userId }),
+    });
+    if (!user) {
+      throw new Error('User not found or access denied');
     }
 
     // Extract last 4 digits if card number is provided
@@ -39,16 +35,15 @@ export class PaymentService {
   }
 
   async updatePaymentMethod(id: string, input: AddPaymentMethodInput) {
-    const country = this.accessContext.country;
-
     // Verify ownership and country context
-    if (country) {
-      const method = await this.prisma.paymentMethod.findFirst({
-        where: { id, user: { country: country as any } }
-      });
-      if (!method) {
-        throw new Error('Payment method not found or access denied');
-      }
+    const method = await this.prisma.paymentMethod.findFirst({
+      where: {
+        id,
+        user: this.accessContext.getScopeFilter(),
+      },
+    });
+    if (!method) {
+      throw new Error('Payment method not found or access denied');
     }
 
     const last4 = input.cardNumber ? input.cardNumber.slice(-4) : undefined;
@@ -66,13 +61,11 @@ export class PaymentService {
   }
 
   async checkout(orderId: string, paymentMethodId: string) {
-    const country = this.accessContext.country;
-
     // Run in a transaction to ensure atomicity
     return this.prisma.$transaction(async (tx) => {
-      // 1. Get the order with country restriction
+      // 1. Get the order within scope
       const order = await tx.order.findFirst({
-        where: country ? { id: orderId, country: country as any } : { id: orderId },
+        where: this.accessContext.getScopeFilter({ id: orderId }),
       });
 
       if (!order) {
