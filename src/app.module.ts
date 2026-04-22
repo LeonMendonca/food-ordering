@@ -10,6 +10,7 @@ import { PrismaModule } from './prisma.module';
 import { PaymentModule } from './payment/payment.module';
 import { AccessContextService } from './access-context.service';
 import { AccessContextMiddleware } from './access-context.middleware';
+import { AccessContextModule } from './access-context.module';
 
 @Module({
   imports: [
@@ -21,13 +22,14 @@ import { AccessContextMiddleware } from './access-context.middleware';
         outputAs: 'class',
       },
     }),
+    AccessContextModule,
     RestaurantModule,
     OrderModule,
     PrismaModule,
     PaymentModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AccessContextService],
+  providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

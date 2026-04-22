@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { PaymentResolver } from './payment.resolver';
-import { AccessContextService } from 'src/access-context.service';
 
 @Module({
-  providers: [PaymentService, PaymentResolver, AccessContextService],
+  providers: [PaymentService, PaymentResolver],
   exports: [PaymentService],
 })
 export class PaymentModule { }
