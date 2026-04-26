@@ -8,7 +8,7 @@ export class PaymentService {
   constructor(
     private prisma: PrismaService,
     private accessContext: AccessContextService
-  ) {}
+  ) { }
 
   async addPaymentMethod(userId: string, input: AddPaymentMethodInput) {
     // Verify user belongs to the current scope
@@ -60,6 +60,41 @@ export class PaymentService {
     });
   }
 
+  async findAllMethods() {
+    return this.prisma.paymentMethod.findMany({
+      where: {
+        user: this.accessContext.getScopeFilter(),
+      },
+      include: {
+        user: true,
+      },
+    });
+  }
+
+  async findAllPayments() {
+    return this.prisma.payment.findMany({
+      where: {
+        order: this.accessContext.getScopeFilter(),
+      },
+      include: {
+        order: {
+          include: {
+            customer: true,
+            items: {
+              include: {
+                dish: true,
+              },
+            },
+          },
+        },
+        method: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
   async checkout(orderId: string, paymentMethodId: string) {
     // Run in a transaction to ensure atomicity
     return this.prisma.$transaction(async (tx) => {
@@ -82,17 +117,17 @@ export class PaymentService {
           orderId,
           paymentMethodId,
           amount: order.totalPrice,
-          status: 'SUCCESS', // Mocking immediate success
+          status: 'SUCCESS',
         },
         include: {
           order: {
             include: {
-                customer: true,
-                items: {
-                    include: {
-                        dish: true
-                    }
+              customer: true,
+              items: {
+                include: {
+                  dish: true
                 }
+              }
             }
           },
           method: true,

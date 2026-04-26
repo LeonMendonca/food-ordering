@@ -8,7 +8,7 @@ export class AccessContextMiddleware implements NestMiddleware {
   constructor(
     private readonly prisma: PrismaService,
     private readonly accessContext: AccessContextService,
-  ) {}
+  ) { }
 
   async use(req: Request, res: Response, next: NextFunction) {
     const userId = req.headers['x-user-id'] as string;

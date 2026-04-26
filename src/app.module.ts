@@ -11,6 +11,8 @@ import { PaymentModule } from './payment/payment.module';
 import { AccessContextService } from './access-context.service';
 import { AccessContextMiddleware } from './access-context.middleware';
 import { AccessContextModule } from './access-context.module';
+import { UserModule } from './user/user.module';
+
 
 @Module({
   imports: [
@@ -27,6 +29,7 @@ import { AccessContextModule } from './access-context.module';
     OrderModule,
     PrismaModule,
     PaymentModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

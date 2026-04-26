@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { OrderService } from './order.service';
 import { Order, CreateOrderInput, OrderStatus, Country } from '../graphql';
 import { UseGuards } from '@nestjs/common';
@@ -10,6 +10,16 @@ import { Role } from '@prisma/client';
 @UseGuards(RolesGuard)
 export class OrderResolver {
   constructor(private readonly orderService: OrderService) { }
+
+  @Query('orders')
+  async orders() {
+    return this.orderService.findAll()
+  }
+
+  @Query('order')
+  async order(@Args('id') id: string) {
+    return this.orderService.findOne(id)
+  }
 
   @Mutation('createOrder')
   async createOrder(@Args('input') input: CreateOrderInput) {

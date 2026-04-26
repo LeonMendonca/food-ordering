@@ -72,6 +72,16 @@ export abstract class IQuery {
     abstract me(): User | Promise<User>;
 
     abstract paymentMethods(): PaymentMethod[] | Promise<PaymentMethod[]>;
+
+    abstract users(country?: Nullable<Country>, role?: Nullable<Role>): User[] | Promise<User[]>;
+
+    abstract user(id: string): Nullable<User> | Promise<Nullable<User>>;
+
+    abstract distinctCountries(): Country[] | Promise<Country[]>;
+
+    abstract distinctRoles(): Role[] | Promise<Role[]>;
+
+    abstract payments(): Payment[] | Promise<Payment[]>;
 }
 
 export abstract class IMutation {

@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { PaymentService } from './payment.service';
 import { AddPaymentMethodInput } from '../graphql';
 import { UseGuards } from '@nestjs/common';
@@ -9,9 +9,22 @@ import { Role } from '@prisma/client';
 @Resolver('Payment')
 @UseGuards(RolesGuard)
 export class PaymentResolver {
-  constructor(private readonly paymentService: PaymentService) {}
+  constructor(private readonly paymentService: PaymentService) { }
+
+  @Query('paymentMethods')
+  @Roles(Role.ADMIN, Role.MANAGER)
+  async getPaymentMethods() {
+    return this.paymentService.findAllMethods();
+  }
+
+  @Query('payments')
+  @Roles(Role.ADMIN, Role.MANAGER)
+  async getPayments() {
+    return this.paymentService.findAllPayments();
+  }
 
   @Mutation('addPaymentMethod')
+  @Roles(Role.ADMIN, Role.MANAGER)
   async addPaymentMethod(
     @Args('userId') userId: string,
     @Args('input') input: AddPaymentMethodInput,

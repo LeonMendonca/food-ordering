@@ -44,6 +44,12 @@ type Query {
 
   me: User!
   paymentMethods: [PaymentMethod!]!
+
+  users(country: Country, role: Role): [User!]!
+  user(id: ID!): User
+  distinctCountries: [Country!]!
+  distinctRoles: [Role!]!
+  payments: [Payment!]!
 }
 
 # ======================
